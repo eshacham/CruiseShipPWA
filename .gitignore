@@ -26,7 +26,5 @@ yarn-error.log*
 /backend/bin
 /backend/publish
 /backend/obj
+publish/
 
-
-
-backend/bin/Debug/net9.0/appsettings.Development.json

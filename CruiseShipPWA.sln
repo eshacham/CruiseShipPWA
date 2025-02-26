@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "backend", "backend\backend.csproj", "{E47FA2E2-E338-4ABE-A6AF-3400F92578CB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CruiseShipApi", "backend\CruiseShipApi.csproj", "{E47FA2E2-E338-4ABE-A6AF-3400F92578CB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
