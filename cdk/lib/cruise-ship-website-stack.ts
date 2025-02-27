@@ -43,7 +43,9 @@ export class CruiseShipWebsiteStack extends cdk.Stack {
     new s3deploy.BucketDeployment(this, 'DeployWebsite', {
       sources: [s3deploy.Source.asset('../frontend/build')],
       destinationBucket: websiteBucket,
-      retainOnDelete: false
+      retainOnDelete: false,
+      distributionPaths: ['/*'],
+      distribution: distribution,
     });
 
     // Output the Website URL
