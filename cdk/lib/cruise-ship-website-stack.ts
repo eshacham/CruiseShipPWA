@@ -2,6 +2,9 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
+import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
+import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
+import * as iam from 'aws-cdk-lib/aws-iam';
 
 export class CruiseShipWebsiteStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -10,22 +13,29 @@ export class CruiseShipWebsiteStack extends cdk.Stack {
     // S3 bucket to host the React app (static website hosting)
     const websiteBucket = new s3.Bucket(this, 'WebsiteBucket', {
       websiteIndexDocument: 'index.html',
-      blockPublicAccess: new s3.BlockPublicAccess({
-        blockPublicAcls: false,
-        blockPublicPolicy: false,
-        ignorePublicAcls: false,
-        restrictPublicBuckets: false
-      }),
-      publicReadAccess: true,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      enforceSSL: true,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
-      autoDeleteObjects: true
+      autoDeleteObjects: true,
+    });
+
+    const distribution = new cloudfront.Distribution(this, "WebsiteDistribution", {
+      defaultBehavior: {
+          origin: origins.S3BucketOrigin.withOriginAccessControl(websiteBucket),
+      },
+      defaultRootObject: "index.html",
     });
 
     websiteBucket.addToResourcePolicy(
-      new cdk.aws_iam.PolicyStatement({
-        actions: ["s3:GetObject"],
+      new iam.PolicyStatement({
+        actions: ['s3:GetObject'],
         resources: [`${websiteBucket.bucketArn}/*`],
-        principals: [new cdk.aws_iam.AnyPrincipal()],
+        principals: [new iam.ServicePrincipal('cloudfront.amazonaws.com')],
+        conditions: {
+          StringEquals: {
+            'AWS:SourceArn': distribution.distributionArn,
+          },
+        },
       })
     );
 
@@ -38,8 +48,8 @@ export class CruiseShipWebsiteStack extends cdk.Stack {
 
     // Output the Website URL
     new cdk.CfnOutput(this, 'WebsiteUrl', {
-      value: websiteBucket.bucketWebsiteUrl,
-      description: 'The URL of the S3 hosted website'
+      value: `https://${distribution.distributionDomainName}`,
+      description: 'CloudFront hosted website URL',
     });
   }
 }
